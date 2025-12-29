@@ -1,0 +1,8 @@
+FlexiMart ETL Data Quality Report
+---------------------------------
+Customers records processed: 20
+Products records processed: 17
+Sales records processed: 32
+Duplicates handled: Yes
+Missing values handled: Yes
+Records loaded successfully into database
