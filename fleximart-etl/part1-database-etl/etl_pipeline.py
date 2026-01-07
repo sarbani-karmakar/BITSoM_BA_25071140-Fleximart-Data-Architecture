@@ -1,30 +1,49 @@
-# ==========================================
 # ETL Pipeline for FlexiMart
 # Task 1.1 – Data Engineering Assignment
-# ==========================================
 
 import pandas as pd
 import mysql.connector
 from datetime import datetime
+
+# Data quality counters
+
+report = {
+    "customers_initial": 0,
+    "customers_duplicates_removed": 0,
+    "customers_missing_emails_removed": 0,
+
+    "products_initial": 0,
+    "products_missing_prices_removed": 0,
+    "products_missing_stock_filled": 0,
+
+    "sales_initial": 0,
+    "sales_duplicates_removed": 0,
+    "sales_invalid_records_removed": 0
+}
+
 # Database connection configuration
+
 db_config = {
     "host": "localhost",
     "user": "root",
-    "password": "$@Rb@n1130",
+    "password": "2307",
     "database": "fleximart"
 }
+
 try:
     connection = mysql.connector.connect(**db_config)
     print("Connected to MySQL database successfully!")
 except mysql.connector.Error as err:
     print("Error:", err)
-    
+
 # File paths
+
 customers_file = "Data/customers_raw.csv"
 products_file = "Data/products_raw.csv"
 sales_file = "Data/sales_raw.csv"
 
 # Extract: Read CSV files
+
 customers_df = pd.read_csv(customers_file)
 products_df = pd.read_csv(products_file)
 sales_df = pd.read_csv(sales_file)
@@ -37,19 +56,22 @@ print("Sales records:", len(sales_df))
 # Transform: Customers
 # -------------------------------
 
-# Track initial customer count
-customers_initial = len(customers_df)
+report["customers_initial"] = len(customers_df)
 
 # Remove duplicate customers (based on email)
-customers_df = customers_df.drop_duplicates(subset="email")
-customers_duplicates_removed = customers_initial - len(customers_df)
 
-# Remove rows with missing email
+before = len(customers_df)
+customers_df = customers_df.drop_duplicates(subset="email")
+report["customers_duplicates_removed"] = before - len(customers_df)
+
+# Remove rows with missing email (email is mandatory)
+
 before = len(customers_df)
 customers_df = customers_df.dropna(subset=["email"])
-customers_missing_emails_removed = before - len(customers_df)
+report["customers_missing_emails_removed"] = before - len(customers_df)
 
-# Clean phone numbers
+# Clean phone numbers: keep digits only, add +91
+
 def clean_phone(phone):
     if pd.isna(phone):
         return None
@@ -63,32 +85,37 @@ def clean_phone(phone):
 customers_df["phone"] = customers_df["phone"].apply(clean_phone)
 
 # Standardize city names
+
 customers_df["city"] = customers_df["city"].str.strip().str.title()
 
-# Fix registration_date format
+# Convert registration_date to YYYY-MM-DD
+
 customers_df["registration_date"] = pd.to_datetime(
     customers_df["registration_date"],
     errors="coerce",
     dayfirst=True
 ).dt.date
 
-
 # -------------------------------
 # Transform: Products
 # -------------------------------
 
 # Track initial product count
+
 products_initial = len(products_df)
 
 # Remove products with missing price
+
 before = len(products_df)
 products_df = products_df.dropna(subset=["price"])
 products_missing_prices_removed = before - len(products_df)
 
 # Fill missing stock with 0
+
 products_df["stock_quantity"] = products_df["stock_quantity"].fillna(0).astype(int)
 
 # Standardize category names
+
 products_df["category"] = products_df["category"].str.strip().str.lower()
 products_df["category"] = products_df["category"].replace({
     "electronics": "Electronics",
@@ -97,26 +124,30 @@ products_df["category"] = products_df["category"].replace({
 })
 
 # Clean product names (remove extra spaces)
-products_df["product_name"] = products_df["product_name"].str.strip()
 
+products_df["product_name"] = products_df["product_name"].str.strip()
 
 # -------------------------------
 # Transform: Sales
 # -------------------------------
 
 # Track initial sales count
+
 sales_initial = len(sales_df)
 
 # Remove duplicate transactions (based on transaction_id)
+
 sales_df = sales_df.drop_duplicates(subset="transaction_id")
 sales_duplicates_removed = sales_initial - len(sales_df)
 
 # Remove records with missing customer_id or product_id
+
 before = len(sales_df)
 sales_df = sales_df.dropna(subset=["customer_id", "product_id"])
 sales_invalid_records_removed = before - len(sales_df)
 
 # Convert transaction_date to YYYY-MM-DD
+
 sales_df["transaction_date"] = pd.to_datetime(
     sales_df["transaction_date"],
     errors="coerce",
@@ -124,10 +155,10 @@ sales_df["transaction_date"] = pd.to_datetime(
 ).dt.date
 
 # Remove rows where date conversion failed
+
 before = len(sales_df)
 sales_df = sales_df.dropna(subset=["transaction_date"])
 sales_invalid_records_removed += before - len(sales_df)
-
 
 # -------------------------------
 # Load: Customers
@@ -142,6 +173,8 @@ cursor.execute("TRUNCATE TABLE products")
 cursor.execute("TRUNCATE TABLE customers")
 cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
 connection.commit()
+
+
 
 insert_customer_query = """
 INSERT INTO customers (first_name, last_name, email, phone, city, registration_date)
@@ -160,7 +193,6 @@ for _, row in customers_df.iterrows():
 
 connection.commit()
 print("Customers loaded successfully!")
-
 
 # -------------------------------
 # Load: Products
@@ -184,12 +216,16 @@ print("Products loaded successfully!")
 
 
 # -------------------------------
-# Load: Orders
+# Load: Orders 
 # -------------------------------
 
-# Build mapping from customers table
-cursor.execute("SELECT customer_id, email FROM customers")
-customer_map = {email: customer_id for customer_id, email in cursor.fetchall()}
+# Create mapping using DISTINCT customer_id from sales CSV
+cursor.execute("SELECT customer_id FROM customers ORDER BY customer_id")
+db_customer_ids = [row[0] for row in cursor.fetchall()]
+
+csv_customers = sales_df["customer_id"].dropna().unique()
+
+customer_code_map = dict(zip(csv_customers, db_customer_ids))
 
 insert_order_query = """
 INSERT INTO orders (customer_id, order_date, total_amount, status)
@@ -197,13 +233,11 @@ VALUES (%s, %s, %s, %s)
 """
 
 for _, row in sales_df.iterrows():
-    email = row["customer_id"]   # CSV customer_id column contains customer code/email mapping source
-
-    if email not in customer_map:
+    if row["customer_id"] not in customer_code_map:
         continue
 
     cursor.execute(insert_order_query, (
-        customer_map[email],
+        customer_code_map[row["customer_id"]],
         row["transaction_date"],
         row["quantity"] * row["unit_price"],
         row["status"]
@@ -212,48 +246,39 @@ for _, row in sales_df.iterrows():
 connection.commit()
 print("Orders loaded successfully!")
 
-
 # -------------------------------
-# Load: Order Items
+# Load: Order Items 
 # -------------------------------
 
-# Build product mapping
-cursor.execute("SELECT product_id, product_name FROM products")
-product_map = {name: pid for pid, name in cursor.fetchall()}
+cursor.execute("SELECT order_id FROM orders ORDER BY order_id")
+order_ids = [row[0] for row in cursor.fetchall()]
 
-# Build order mapping
-cursor.execute("SELECT order_id, customer_id, order_date FROM orders")
-order_rows = cursor.fetchall()
+cursor.execute("SELECT product_id FROM products ORDER BY product_id")
+db_product_ids = [row[0] for row in cursor.fetchall()]
+
+csv_products = sales_df["product_id"].dropna().unique()
+
+product_code_map = dict(zip(csv_products, db_product_ids))
 
 insert_order_item_query = """
 INSERT INTO order_items (order_id, product_id, quantity, unit_price, subtotal)
 VALUES (%s, %s, %s, %s, %s)
 """
 
-order_index = 0
-
-for _, row in sales_df.iterrows():
-    if order_index >= len(order_rows):
+for i, row in sales_df.iterrows():
+    if i >= len(order_ids):
         break
 
-    order_id = order_rows[order_index][0]
-    product_name = row["product_id"]
-
-    if product_name not in product_map:
+    if row["product_id"] not in product_code_map:
         continue
 
-    quantity = row["quantity"]
-    price = row["unit_price"]
-
     cursor.execute(insert_order_item_query, (
-        order_id,
-        product_map[product_name],
-        quantity,
-        price,
-        quantity * price
+        order_ids[i],
+        product_code_map[row["product_id"]],
+        int(row["quantity"]),
+        float(row["unit_price"]),
+        int(row["quantity"]) * float(row["unit_price"])
     ))
-
-    order_index += 1
 
 connection.commit()
 print("Order items loaded successfully!")
