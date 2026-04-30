@@ -3,7 +3,7 @@
 **Student Name:** Sarbani Karmakar
 **Student ID:** bitsom_ba_25071140
 **Email:** 30sakarmakar@gmail.com
-**Course:** Data for Artificial Intelligence
+**Course:** Business Analytics with Gen and Agentic AI
 **Date:** April 2026
 
 ---
