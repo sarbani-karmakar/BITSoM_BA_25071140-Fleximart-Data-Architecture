@@ -10,7 +10,7 @@
 
 ## Project Overview
 
-This project implements an end-to-end data architecture solution for **FlexiMart**, a fictional e-commerce company. Acting as a Data Engineer, the goal was to build a complete data pipeline — from raw, dirty CSV files to a fully functional analytics system.
+This project implements an end-to-end data architecture solution for **FlexiMart**, a fictional e-commerce company. Acting as a Data Engineer, the goal was to build a complete data pipeline - from raw, dirty CSV files to a fully functional analytics system.
 
 The project covers three major components:
 - An **ETL pipeline** that cleans and loads transactional data into a relational MySQL database
