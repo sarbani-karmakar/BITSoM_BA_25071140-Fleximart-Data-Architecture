@@ -1,7 +1,7 @@
 # FlexiMart Data Architecture Project
 
 **Student Name:** Sarbani Karmakar
-**Student ID:** bitsom_ba_25071140
+**Student ID:** BITSoM_BA_25071140
 **Email:** 30sakarmakar@gmail.com
 **Course:** Business Analytics with Gen and Agentic AI
 **Date:** Jan 2026
