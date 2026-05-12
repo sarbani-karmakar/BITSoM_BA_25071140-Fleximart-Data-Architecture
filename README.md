@@ -30,7 +30,7 @@ The project covers three major components:
 | **Total** | | **100** |
 
 ---
-
+## Repository Structure
 ├── part1-database-etl/
 │   ├── etl_pipeline.py           # ETL script: extract, clean, load
 │   ├── schema_documentation.md   # ER descriptions, normalization, sample data
@@ -49,6 +49,7 @@ The project covers three major components:
     ├── warehouse_schema.sql      # DDL for dim/fact tables
     ├── warehouse_data.sql        # INSERT statements
     └── analytics_queries.sql    # 3 OLAP queries
+```
 ## Technologies Used
 
 | Technology | Purpose |
