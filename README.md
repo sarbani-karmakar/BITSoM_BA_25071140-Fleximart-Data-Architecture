@@ -31,14 +31,11 @@ The project covers three major components:
 
 ---
 
-## Repository Structure:
-bitsom_ba_25071140-fleximart-data-architecture/
-├── README.md
 ├── part1-database-etl/
 │   ├── etl_pipeline.py           # ETL script: extract, clean, load
-│   ├── schema_documentation.md  # ER descriptions, normalization, sample data
+│   ├── schema_documentation.md   # ER descriptions, normalization, sample data
 │   ├── business_queries.sql      # 3 business SQL queries
-│   ├── data_quality_report.txt  # Auto-generated ETL quality report
+│   ├── data_quality_report.txt   # Auto-generated ETL quality report
 │   └── data/
 │       ├── customers_raw.csv
 │       ├── products_raw.csv
@@ -48,12 +45,10 @@ bitsom_ba_25071140-fleximart-data-architecture/
 │   ├── mongodb_operations.js     # 5 MongoDB operations
 │   └── products_catalog.json    # 12-product catalog with nested specs & reviews
 └── part3-datawarehouse/
-├── star_schema_design.md     # Star schema design doc with data flow
-├── warehouse_schema.sql      # DDL for dim/fact tables
-├── warehouse_data.sql        # INSERT statements
-└── analytics_queries.sql     # 3 OLAP queries
----
-
+    ├── star_schema_design.md     # Star schema design doc with data flow
+    ├── warehouse_schema.sql      # DDL for dim/fact tables
+    ├── warehouse_data.sql        # INSERT statements
+    └── analytics_queries.sql    # 3 OLAP queries
 ## Technologies Used
 
 | Technology | Purpose |
