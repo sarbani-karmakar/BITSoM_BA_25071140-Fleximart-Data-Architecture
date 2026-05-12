@@ -29,29 +29,6 @@ The project covers three major components:
 | Documentation | README files and code quality | 10 |
 | **Total** | | **100** |
 
----
-## Repository Structure
-
-part1-database-etl/
-├── etl_pipeline.py           
-├── schema_documentation.md  
-├── business_queries.sql      
-├── data_quality_report.txt   
-└── data/
-    ├── customers_raw.csv
-    ├── products_raw.csv
-    └── sales_raw.csv
-
-part2-nosql/
-├── nosql_analysis.md         
-├── mongodb_operations.js     
-└── products_catalog.json    
-
-part3-datawarehouse/
-├── star_schema_design.md     
-├── warehouse_schema.sql      
-├── warehouse_data.sql        
-└── analytics_queries.sql
 ```
 ## Technologies Used
 
