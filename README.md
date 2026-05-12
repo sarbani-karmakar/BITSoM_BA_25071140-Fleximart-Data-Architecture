@@ -31,24 +31,27 @@ The project covers three major components:
 
 ---
 ## Repository Structure
-├── part1-database-etl/
-│   ├── etl_pipeline.py           # ETL script: extract, clean, load
-│   ├── schema_documentation.md   # ER descriptions, normalization, sample data
-│   ├── business_queries.sql      # 3 business SQL queries
-│   ├── data_quality_report.txt   # Auto-generated ETL quality report
-│   └── data/
-│       ├── customers_raw.csv
-│       ├── products_raw.csv
-│       └── sales_raw.csv
-├── part2-nosql/
-│   ├── nosql_analysis.md         # RDBMS limitations, MongoDB benefits, trade-offs
-│   ├── mongodb_operations.js     # 5 MongoDB operations
-│   └── products_catalog.json    # 12-product catalog with nested specs & reviews
-└── part3-datawarehouse/
-    ├── star_schema_design.md     # Star schema design doc with data flow
-    ├── warehouse_schema.sql      # DDL for dim/fact tables
-    ├── warehouse_data.sql        # INSERT statements
-    └── analytics_queries.sql    # 3 OLAP queries
+
+part1-database-etl/
+├── etl_pipeline.py           
+├── schema_documentation.md  
+├── business_queries.sql      
+├── data_quality_report.txt   
+└── data/
+    ├── customers_raw.csv
+    ├── products_raw.csv
+    └── sales_raw.csv
+
+part2-nosql/
+├── nosql_analysis.md         
+├── mongodb_operations.js     
+└── products_catalog.json    
+
+part3-datawarehouse/
+├── star_schema_design.md     
+├── warehouse_schema.sql      
+├── warehouse_data.sql        
+└── analytics_queries.sql
 ```
 ## Technologies Used
 
